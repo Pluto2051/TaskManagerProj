@@ -3,7 +3,7 @@ package org.example.tasks;
 public class Task {
     private String name;
     private int id;
-    private String description;
+    private String description = "Описание не добавлено";
     private String status;
     private String deadline;
 

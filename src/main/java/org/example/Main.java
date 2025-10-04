@@ -11,7 +11,7 @@ public class Main {
         int counter = 0; //Счётчик для проставления айди задачам
 
         while(true) { //Цикл программы
-            System.out.println("Добавьте задачу. Доступные команды: add, list, remove, exit");
+            System.out.println("Добавьте задачу. Доступные команды: add, list, remove, id, description, exit");
             String command = sc.nextLine();
             switch (command) {
                 case "add":
@@ -29,11 +29,19 @@ public class Main {
                 case "list":
                     TaskManager.listAll();
                     break;
-                /*case "id":
+                case "id":
                     System.out.println("Введите айди задачи:");
                     System.out.println(TaskManager.findById(Integer.parseInt(sc.nextLine())));
-                    Work in progress...
-                 */
+                    break;
+                case "description":
+                    System.out.println("Введите id задачи:");
+                    TaskManager.listAll();
+                    int id = Integer.parseInt(sc.nextLine());
+                    System.out.println("Введите описание для задачи: " + TaskManager.findById(id));
+                    String description = sc.nextLine();
+                    TaskManager.setDescription(id, description);
+                    System.out.println("Описание для задачи добавлено!");
+                    break;
                 case "exit"://Выход из программы, цикла
                     System.out.println("Закрытие...");
                     return;

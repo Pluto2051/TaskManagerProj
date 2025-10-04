@@ -24,14 +24,18 @@ public class TaskManager {
         }
     }
 
-    public static Task findById(int id) {
-        return tasks.get(id);
+    public static String findById(int id) {
+        return tasks.get(id).getName(); // получает номер от пользователя и возвращает поле имени задачи
     }
 
-    public static void listAll() {
+    public static void listAll() { // выводит айди, имя, и описания всех задач в ХэшМапе
         for(Task task : tasks.values()) {
-            System.out.println(task.getName() + " " + task.getId());
+            System.out.println(task.getId() + " " + task.getName() + " " + task.getDescription());
         }
+    }
+
+    public static void setDescription(int id, String description) {
+        tasks.get(id).setDescription(description); //получает айди задачи и присваивает ей описание
     }
 
 }
