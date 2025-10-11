@@ -1,11 +1,11 @@
 package org.example.tasks;
 
 public class Task {
-    private String name;
+    private String name = "Имя не задано";
     private int id;
     private String description = "Описание не добавлено";
-    private String status;
-    private String deadline;
+    private String status = "Статус не задан";
+    private String deadline = "Срок не добавлен";
 
     public Task(String name) {
         this.name = name;
