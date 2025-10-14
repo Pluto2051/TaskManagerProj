@@ -3,10 +3,12 @@ import org.example.tasks.Task;
 import org.example.tasks.TaskManager;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
-    private static int counter = 0; //Счётчик для проставления айди задачам
+    //private static int counter = 0; //Счётчик для проставления айди задачам
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException {
@@ -35,6 +37,12 @@ public class Main {
                 case "deadline":
                     setDeadline();
                     break;
+                case "testSave":
+                    TaskManager.saveTask();
+                    break;
+                case "testLoad":
+                    TaskManager.loadTask();
+                    break;
                 case "exit"://Выход из программы, цикла
                     System.out.println("Закрытие...");
                     return;
@@ -47,8 +55,8 @@ public class Main {
     private static void addTask() {
         System.out.println("Введите имя задачи:");
         Task task = new Task(sc.nextLine());
-        task.setId(counter);
-        counter ++;
+        task.setId(TaskManager.increaseCounter());
+        //counter ++;
         TaskManager.addTask(task);
     }
 

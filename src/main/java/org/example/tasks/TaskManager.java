@@ -1,10 +1,11 @@
 package org.example.tasks;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class TaskManager {
 
     private static final HashMap<Integer, Task> tasks = new HashMap<>();
+    static int counter = 0;
 
     public static void addTask(Task task) {
         tasks.put(task.getId(), task);
@@ -74,6 +75,53 @@ public class TaskManager {
 
     public static void setStatus(int id, String status) {
         tasks.get(id).setStatus(status);
+    }
+
+    public static int increaseCounter() {
+        int temp = counter;
+        counter++;
+        return temp;
+    }
+
+    public static int getCounter() {
+        return counter;
+    }
+
+    public static void setCounter(int counter) {
+        TaskManager.counter = counter;
+    }
+
+    public static void saveTask() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("test.txt"))) {
+            writer.write(String.valueOf(getCounter()));
+            writer.newLine();
+            for(Task task : tasks.values()) {
+                writer.write(task.getId() + ";" + task.getName() + ";" + task.getStatus()
+                        + ";" + task.getDescription() + ";" + task.getDeadline() + ";");
+                writer.newLine();
+            }
+            System.out.println("Запись задач в файл произведена успешно!");
+        } catch (IOException e) {
+            System.out.println("Ошибка при создании или записи файла");
+        }
+    }
+
+    public static void loadTask() {
+        try (Scanner sc = new Scanner(new File ("test.txt"))) {
+            String firstLine = sc.nextLine().replace("\uFEFF", "").trim(); //удаляет невидимый символ и пробелы
+            setCounter(Integer.parseInt(firstLine));
+            while(sc.hasNextLine()) {
+                String[] parts = sc.nextLine().split(";");
+                Task task = new Task(parts[1]);
+                task.setId(Integer.parseInt(parts[0]));
+                task.setStatus(parts[2]);
+                task.setDescription(parts[3]);
+                task.setDeadline(parts[4]);
+                tasks.put(task.getId(), task);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Файл не найден");
+        }
     }
 
 }
