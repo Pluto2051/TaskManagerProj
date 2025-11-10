@@ -1,5 +1,7 @@
 package org.example.tasks;
 
+import java.util.Optional;
+
 public class Task {
     private String name = "Имя не задано";
     private int id;
@@ -18,8 +20,9 @@ public class Task {
         this.name = name;
     }
 
-    public void setId(int id) {
+    public Optional<Integer> setId(int id) {
         this.id = id;
+        return null;
     }
 
     public void setDescription(String description) {

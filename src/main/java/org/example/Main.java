@@ -1,19 +1,25 @@
 package org.example;
 import org.example.tasks.Task;
 import org.example.tasks.TaskManager;
+import org.example.database.DatabaseManager;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class Main {
     //private static int counter = 0; //Счётчик для проставления айди задачам
     private static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
+        TaskManager.loadTask();
+        DatabaseManager.connect();
+        //DatabaseManager.addTask("test", "test description", Timestamp.valueOf("2025-11-10 15:00:00"), "In progress");
         while(true) { //Цикл программы
-            System.out.println("Добавьте задачу. Доступные команды: add, list, remove, id, description, deadline, status, exit");
+            System.out.println("Добавьте задачу командой add. Для получения справки используйте help");
             String command = sc.nextLine();
             switch (command) {
                 case "add":
@@ -23,13 +29,14 @@ public class Main {
                     removeTask();
                     break;
                 case "list":
-                    TaskManager.listAll();
+                    DatabaseManager.showNames();
                     break;
                 case "id":
                     getById();
                     break;
                 case "description":
-                    setDescription();
+                    //setDescription();
+                    DatabaseManager.addDescription(sc.nextLine(), Integer.parseInt(sc.nextLine()));
                     break;
                 case "status":
                     setStatus();
@@ -43,6 +50,9 @@ public class Main {
                 case "testLoad":
                     TaskManager.loadTask();
                     break;
+                case "help":
+                    System.out.println("Доступные команды: add, list, remove, id, description, deadline, status, exit");
+                    break;
                 case "exit"://Выход из программы, цикла
                     System.out.println("Закрытие...");
                     return;
@@ -54,10 +64,7 @@ public class Main {
 
     private static void addTask() {
         System.out.println("Введите имя задачи:");
-        Task task = new Task(sc.nextLine());
-        task.setId(TaskManager.increaseCounter());
-        //counter ++;
-        TaskManager.addTask(task);
+        DatabaseManager.addTask(sc.nextLine());
     }
 
     private static void removeTask() {
@@ -74,6 +81,7 @@ public class Main {
                 }
         }
         TaskManager.removeTask(idRem);
+        TaskManager.saveTask();
     }
 
     private static void setStatus() {
@@ -92,6 +100,7 @@ public class Main {
         String status = sc.nextLine();
         TaskManager.setStatus(idSta, status);
         System.out.println("Статус для задачи добавлен!");
+        TaskManager.saveTask();
     }
 
     private static void getById() {
@@ -125,6 +134,7 @@ public class Main {
         String description = sc.nextLine();
         TaskManager.setDescription(idDes, description);
         System.out.println("Описание для задачи добавлено!");
+        TaskManager.saveTask();
     }
 
     public static void setDeadline() {
@@ -143,6 +153,7 @@ public class Main {
         String deadline = sc.nextLine();
         TaskManager.setDeadline(idDead, deadline);
         System.out.println("Конечная дата для задачи установлена!");
+        TaskManager.saveTask();
     }
 
     private static int safeReadInt() {

@@ -92,7 +92,7 @@ public class TaskManager {
     }
 
     public static void saveTask() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("test.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("tasks.txt"))) {
             writer.write(String.valueOf(getCounter()));
             writer.newLine();
             for(Task task : tasks.values()) {
@@ -100,17 +100,17 @@ public class TaskManager {
                         + ";" + task.getDescription() + ";" + task.getDeadline() + ";");
                 writer.newLine();
             }
-            System.out.println("Запись задач в файл произведена успешно!");
+            //System.out.println("Задачи сохранены успешно!");
         } catch (IOException e) {
             System.out.println("Ошибка при создании или записи файла");
         }
     }
 
     public static void loadTask() {
-        try (Scanner sc = new Scanner(new File ("test.txt"))) {
+        try (Scanner sc = new Scanner(new File ("tasks.txt"))) {
             String firstLine = sc.nextLine().replace("\uFEFF", "").trim(); //удаляет невидимый символ и пробелы
             setCounter(Integer.parseInt(firstLine));
-            while(sc.hasNextLine()) {
+            while (sc.hasNextLine()) {
                 String[] parts = sc.nextLine().split(";");
                 Task task = new Task(parts[1]);
                 task.setId(Integer.parseInt(parts[0]));
@@ -119,8 +119,9 @@ public class TaskManager {
                 task.setDeadline(parts[4]);
                 tasks.put(task.getId(), task);
             }
+
         } catch (FileNotFoundException e) {
-            System.out.println("Файл не найден");
+            System.out.println("Добро пожаловать в Task Manager! Создайте свою первую задачу!");
         }
     }
 
