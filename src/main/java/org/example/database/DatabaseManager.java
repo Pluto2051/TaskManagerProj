@@ -1,5 +1,6 @@
 package org.example.database;
 import java.sql.*;
+import java.time.LocalDate;
 
 
 public class DatabaseManager {
@@ -12,62 +13,70 @@ public class DatabaseManager {
     }
 
     public static void addTask(String taskName) {
-        //String sql = "INSERT INTO tasks (task_name, description, deadline, status) VALUES (?, ?, ?, ?)";
         String sql = "INSERT INTO tasks (task_name) VALUES (?)";
-
         try (Connection conn = connect();
         PreparedStatement pstm = conn.prepareStatement(sql)) {
             pstm.setString(1, taskName);
-//            pstm.setString(2, description);
-//            pstm.setTimestamp(3, deadline);
-//            pstm.setString(4, status);
             pstm.executeUpdate();
-
             System.out.println("Задача добавлена в базу данных!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static void addDescription(String description, int id) {
+    public static void removeTask(int id) {
+        String sql = "DELETE FROM tasks " +
+                "WHERE id = ?";
+        try (Connection conn = connect();
+        PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, id);
+            pstm.executeUpdate();
+            System.out.println("Задача успешно удалена!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void setDescription(int id, String description) {
         String sql = "UPDATE tasks " +
                 "SET description = ? " +
                 "WHERE id = ? ";
-
         try (Connection conn = connect();
              PreparedStatement pstm = conn.prepareStatement(sql)) {
             pstm.setString(1, description);
             pstm.setInt(2, id);
             pstm.executeUpdate();
-
             System.out.println("Описание добавлено/обновлено!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static void addDeadline(Timestamp deadline) {
-        String sql = "INSERT INTO tasks (deadline) VALUES (?)";
-
+    public static void setDeadline(int id, LocalDate deadline) {
+        String sql = "UPDATE tasks " +
+                "SET deadline = ? " +
+                "WHERE id = ? ";
         try (Connection conn = connect();
              PreparedStatement pstm = conn.prepareStatement(sql)) {
-            pstm.setTimestamp(1, deadline);
+            pstm.setDate(1, Date.valueOf(deadline));
+            pstm.setInt(2, id);
             pstm.executeUpdate();
-
             System.out.println("Дэдлайн добавлен!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static void addStatus(String status) {
-        String sql = "INSERT INTO tasks (status) VALUES (?)";
-
+    public static void setStatus(int id, String status) {
+        String sql = "UPDATE tasks " +
+                "SET status = ? " +
+                "WHERE id = ?";
         try (Connection conn = connect();
              PreparedStatement pstm = conn.prepareStatement(sql)) {
             pstm.setString(1, status);
+            pstm.setInt(2, id);
             pstm.executeUpdate();
-
             System.out.println("Статус добавлен!");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,8 +85,8 @@ public class DatabaseManager {
 
     public static void showNames() {
         String sql = "SELECT id, task_name " +
-                "FROM tasks";
-
+                "FROM tasks " +
+                "ORDER BY id ASC";
         try (Connection conn = connect();
         PreparedStatement pstm = conn.prepareStatement(sql)) {
             ResultSet rs = pstm.executeQuery();
@@ -88,6 +97,30 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static String getById(int id) {
+        String sql = "SELECT * FROM tasks WHERE id = ?";
+        try (Connection conn = connect();
+        PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, id);
+            ResultSet rs = pstm.executeQuery();
+            if(rs.next()) {
+                String name = rs.getString("Task_name");
+                String des = rs.getString("description");
+                Date deadline = rs.getDate("deadline");
+                String status = rs.getString("status");
+                return ("Task name: " + name + "\n " +
+                        "Description: " + des + "\n " +
+                        "Deadline: " + deadline + "\n " +
+                        "Status: " + status);
+            } else {
+                return "Задача не найдена!";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Ошибка при запросе";
         }
     }
 }

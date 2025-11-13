@@ -1,13 +1,11 @@
 package org.example;
-import org.example.tasks.Task;
 import org.example.tasks.TaskManager;
 import org.example.database.DatabaseManager;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class Main {
@@ -15,7 +13,6 @@ public class Main {
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException, SQLException {
-        TaskManager.loadTask();
         DatabaseManager.connect();
         //DatabaseManager.addTask("test", "test description", Timestamp.valueOf("2025-11-10 15:00:00"), "In progress");
         while(true) { //Цикл программы
@@ -35,20 +32,13 @@ public class Main {
                     getById();
                     break;
                 case "description":
-                    //setDescription();
-                    DatabaseManager.addDescription(sc.nextLine(), Integer.parseInt(sc.nextLine()));
+                    setDescription();
                     break;
                 case "status":
                     setStatus();
                     break;
                 case "deadline":
                     setDeadline();
-                    break;
-                case "testSave":
-                    TaskManager.saveTask();
-                    break;
-                case "testLoad":
-                    TaskManager.loadTask();
                     break;
                 case "help":
                     System.out.println("Доступные команды: add, list, remove, id, description, deadline, status, exit");
@@ -69,91 +59,64 @@ public class Main {
 
     private static void removeTask() {
         System.out.println("Введите id задачи, которую нужно удалить:");
-        TaskManager.listAllId();
-        //цикл обработки исключения
-        int idRem;
-        while(true) {
-                idRem = safeReadInt();
-                if (TaskManager.findById(idRem).equals("Id not found")) {
-                    System.out.println("Введите корректный id");
-                } else {
-                    break;
-                }
-        }
-        TaskManager.removeTask(idRem);
-        TaskManager.saveTask();
+        DatabaseManager.showNames();
+        int idRem = safeReadInt();
+        taskIfExists(idRem);
+        DatabaseManager.removeTask(idRem);
     }
 
     private static void setStatus() {
         System.out.println("Введите id задачи:");
-        TaskManager.listAllId();
-        int idSta;
-        while (true) {
-            idSta = safeReadInt();
-            if (TaskManager.findById(idSta).equals("Id not found")) {
-                System.out.println("Введите корректный id");
-            } else {
-                break;
-            }
+        DatabaseManager.showNames();
+        int idSta = safeReadInt();
+        if(!taskIfExists(idSta)) {
+            System.out.println("Задача не найдена или произошла ошибка при запросе!");
+        } else {
+            System.out.println("Введите статус для задачи (В работе, Готово, Отложено)");
+            String status = sc.nextLine();
+            DatabaseManager.setStatus(idSta, status);
         }
-        System.out.println("Введите статус для задачи (В работе, Готово, Отложено): " + TaskManager.findById(idSta));
-        String status = sc.nextLine();
-        TaskManager.setStatus(idSta, status);
-        System.out.println("Статус для задачи добавлен!");
-        TaskManager.saveTask();
     }
 
     private static void getById() {
         System.out.println("Введите айди задачи:");
-        TaskManager.listAllId();
-        int id;
-        while(true) {
-            id = safeReadInt();
-            if(TaskManager.findById(id).equals("Id not found")) {
-                System.out.println("Введите корректный id");
-            } else {
-                break;
-            }
+        DatabaseManager.showNames();
+        int id = safeReadInt();
+        if(!taskIfExists(id)) {
+            System.out.println("Задача не найдена или произошла ошибка при запросе!");
+        } else {
+           System.out.println(DatabaseManager.getById(id));
         }
-        System.out.println(TaskManager.findById(id));
     }
 
     private static void setDescription() {
         System.out.println("Введите id задачи:");
-        TaskManager.listAllId();
-        int idDes;
-        while(true) {
-            idDes = safeReadInt();
-            if(TaskManager.findById(idDes).equals("Id not found")) {
-                System.out.println("Введите корректный id");
-            } else {
-                break;
-            }
+        DatabaseManager.showNames();
+        int idDes = safeReadInt();
+        if (!taskIfExists(idDes)) {
+            System.out.println("Задача не найдена или произошла ошибка при запросе!");
+        } else {
+            System.out.println("Введите описание для задачи");
+            String description = sc.nextLine();
+            DatabaseManager.setDescription(idDes, description);
         }
-        System.out.println("Введите описание для задачи: " + TaskManager.findById(idDes));
-        String description = sc.nextLine();
-        TaskManager.setDescription(idDes, description);
-        System.out.println("Описание для задачи добавлено!");
-        TaskManager.saveTask();
     }
 
     public static void setDeadline() {
         System.out.println("Введите id задачи:");
-        TaskManager.listAllId();
-        int idDead;
-        while(true) {
-            idDead = safeReadInt();
-            if(TaskManager.findById(idDead).equals("Id not found")) {
-                System.out.println("Введите корректный id");
-            } else {
-                break;
+        DatabaseManager.showNames();
+        int idDead = safeReadInt();
+        if(!taskIfExists(idDead)) {
+            System.out.println("Задача не найдена или произошла ошибка при запросе!");
+        } else {
+            System.out.println("Введите конечный срок для задачи в формате гггг-мм-дд");
+            try {
+                LocalDate deadline = LocalDate.parse(sc.nextLine());
+                DatabaseManager.setDeadline(idDead, deadline);
+            } catch (DateTimeParseException e) {
+                System.out.println("Введите корректную дату в формате гггг-мм-дд!");
             }
         }
-        System.out.println("Введите конечную дату для задачи: " + TaskManager.findById(idDead));
-        String deadline = sc.nextLine();
-        TaskManager.setDeadline(idDead, deadline);
-        System.out.println("Конечная дата для задачи установлена!");
-        TaskManager.saveTask();
     }
 
     private static int safeReadInt() {
@@ -163,6 +126,15 @@ public class Main {
             } catch (NumberFormatException exc) {
                 System.out.println("Введите корректный Id в целочисленном формате!");
             }
+        }
+    }
+
+    private static boolean taskIfExists(int id) {
+        if (DatabaseManager.getById(id).equals("Задача не найдена!")
+                || DatabaseManager.getById(id).equals("Ошибка при запросе")) {
+            return false;
+        } else {
+            return true;
         }
     }
 }
