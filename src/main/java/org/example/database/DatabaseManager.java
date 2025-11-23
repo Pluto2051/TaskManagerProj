@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public class DatabaseManager {
     private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
     private static final String USER = "postgres";
-    private static final String PASSWORD = "7qaz8wsx";
+    private static final String PASSWORD = "root";
 
     public static Connection connect() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
